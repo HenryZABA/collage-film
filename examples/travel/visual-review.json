@@ -1,0 +1,114 @@
+{
+  "photos": [
+    {
+      "photo": "lake-boat",
+      "intended_subject": "The two people and their single boat",
+      "backend": "birefnet",
+      "refinement": null,
+      "source_rgb_exact": true,
+      "full_canvas": true,
+      "fit": "cover",
+      "warnings": [
+        "foreground_occupies_under_1_percent: inspect small or incomplete selection"
+      ],
+      "visual_status": "PASS for visible intended subject",
+      "visual_notes": "Very small source subject: both people/boat preserved; warning reviewed, not detail recovery"
+    },
+    {
+      "photo": "van",
+      "intended_subject": "Only the foreground vintage blue/orange camper van",
+      "backend": "birefnet",
+      "refinement": null,
+      "source_rgb_exact": true,
+      "full_canvas": true,
+      "fit": "cover",
+      "warnings": [],
+      "visual_status": "PASS for visible intended subject",
+      "visual_notes": "Vehicle body/windows/wheels retained"
+    },
+    {
+      "photo": "kimono",
+      "intended_subject": "All three kimono-clothed people, with their bags and visible feet",
+      "backend": "birefnet",
+      "refinement": null,
+      "source_rgb_exact": true,
+      "full_canvas": true,
+      "fit": "cover",
+      "warnings": [],
+      "visual_status": "PASS for visible intended subject",
+      "visual_notes": "All three people and accessories retained"
+    },
+    {
+      "photo": "hikers",
+      "intended_subject": "Both backpackers with their backpacks and visible feet",
+      "backend": "birefnet",
+      "refinement": null,
+      "source_rgb_exact": true,
+      "full_canvas": true,
+      "fit": "cover",
+      "warnings": [],
+      "visual_status": "PASS for visible intended subject",
+      "visual_notes": "Both hikers retained independently"
+    },
+    {
+      "photo": "coastal-camper",
+      "intended_subject": "Only the man with the camera; exclude the camper",
+      "backend": "sam2",
+      "refinement": "vitmatte",
+      "source_rgb_exact": true,
+      "full_canvas": true,
+      "fit": "cover",
+      "warnings": [
+        "foreground_occupies_under_1_percent: inspect small or incomplete selection",
+        "model_scores_do_not_replace_visual_review",
+        "refinement_does_not_select_subjects",
+        "interior_background_errors_may_remain"
+      ],
+      "visual_status": "PASS for visible intended subject",
+      "visual_notes": "Camera man selected independently from van"
+    },
+    {
+      "photo": "hanoi",
+      "intended_subject": "The conical-hat person, bicycle and luggage; exclude buildings",
+      "backend": "birefnet",
+      "refinement": null,
+      "source_rgb_exact": true,
+      "full_canvas": true,
+      "fit": "cover",
+      "warnings": [],
+      "visual_status": "PASS for visible intended subject",
+      "visual_notes": "Wheel spokes remain soft and source-blurred; inspected on checkerboard"
+    },
+    {
+      "photo": "street-market",
+      "intended_subject": "Only the black-clothed woman and visible limbs; exclude other people and banner",
+      "backend": "sam2",
+      "refinement": "vitmatte",
+      "source_rgb_exact": true,
+      "full_canvas": true,
+      "fit": "cover",
+      "warnings": [
+        "model_scores_do_not_replace_visual_review",
+        "object_0_prompt_disagreement:positive_missed=1,negative_included=0",
+        "refinement_does_not_select_subjects",
+        "interior_background_errors_may_remain"
+      ],
+      "visual_status": "PASS for visible intended subject",
+      "visual_notes": "Unwanted banner and adjacent people removed; right-side body/limb truncation matches source occlusion, no hidden pixels reconstructed"
+    },
+    {
+      "photo": "cyclist",
+      "intended_subject": "The cyclist, bicycle and bicycle bags; exclude street and buildings",
+      "backend": "birefnet",
+      "refinement": null,
+      "source_rgb_exact": true,
+      "full_canvas": true,
+      "fit": "cover",
+      "warnings": [],
+      "visual_status": "PASS for visible intended subject",
+      "visual_notes": "Small moving source subject and spokes have inherent blur"
+    }
+  ],
+  "decision": "All 8 intended visible subjects reviewed, with source-detail and occlusion caveats retained",
+  "visual_accuracy_metric": "none; not a ground-truth benchmark"
+}

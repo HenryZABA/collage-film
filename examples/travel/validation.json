@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "review_date": "2026-10-05",
+  "photos": 8,
+  "duration_seconds": 4.8,
+  "width": 1080,
+  "height": 1920,
+  "fps": 30,
+  "frames": 144,
+  "audio": "AAC stereo, original procedural music",
+  "foreground_prelude_seconds": 0.2,
+  "pace_bpm": 100,
+  "runtime_check_passed": true,
+  "actual_render_frames_visually_reviewed": 16,
+  "video_sha256": "d50869cde3f54ffe5b4ce5ff8553169c89f12b4b48011a91be1534079a312075",
+  "limits": [
+    "Occluded anatomy is not reconstructed",
+    "Small or motion-blurred source details remain blurred",
+    "This sample does not establish arbitrary-photo accuracy"
+  ]
+}

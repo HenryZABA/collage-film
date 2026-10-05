@@ -8,4 +8,4 @@ The root MIT license covers original Collage Film code and documentation only.
 - **ViTMatte:** [Small Composition-1k weights](https://huggingface.co/hustvl/vitmatte-small-composition-1k), Apache-2.0 model metadata. [Matte Anything](https://github.com/hustvl/Matte-Anything), MIT; adapted trimap procedure carries the full MIT notice in `scripts/vitmatte_backend.py` and setup stores it with runtime metadata. [ViTMatte implementation](https://github.com/hustvl/ViTMatte), MIT.
 - **Other runtime packages:** Python, PyTorch, transformers, OpenCV, NumPy, Pillow, CMake, Ninja and HyperFrames are installed separately and retain their respective upstream licenses.
 
-Weights, environments, user photos, browser state and credentials are excluded. Future demo media will carry its own source/rights record; it is not covered by the root code license.
+Weights, environments, user photos, browser state and credentials are excluded. Demo media in `examples/travel` has its own source/rights record and uses modified Unsplash photos; it is not covered by the root code license.

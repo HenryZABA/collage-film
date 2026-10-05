@@ -1,0 +1,159 @@
+{
+  "schema_version": 1,
+  "images": [
+    {
+      "index": 1,
+      "subject": "The two people and their single boat",
+      "backend": "birefnet",
+      "source_sha256": "abed2e98a3919c55cf8a0a5506eb3ee0fbff6d4d0ea177b970bb988c82ef84b4"
+    },
+    {
+      "index": 2,
+      "subject": "Only the foreground vintage blue/orange camper van",
+      "backend": "birefnet",
+      "source_sha256": "1faa74693a738d0438f2c00fdf8d051ac568b016b1acaca1960d5ea5742b574f"
+    },
+    {
+      "index": 3,
+      "subject": "All three kimono-clothed people, with their bags and visible feet",
+      "backend": "birefnet",
+      "source_sha256": "3cf521cd7958585f35a79ba1b9463f30830c2d6cf441f963751201517593db34"
+    },
+    {
+      "index": 4,
+      "subject": "Both backpackers with their backpacks and visible feet",
+      "backend": "birefnet",
+      "source_sha256": "c143cf276435b0b30c080782cff54d7e5b46049aa3fe5234ff5a6b34ccc7ff5e"
+    },
+    {
+      "index": 5,
+      "subject": "Only the man with the camera; exclude the camper",
+      "backend": "sam2",
+      "source_sha256": "519ba0befacabd010549ad4e3aa19db4cb39eaf8c5e079d25bd7a5803eb0e275",
+      "objects": [
+        {
+          "box": [
+            0.469,
+            0.513,
+            0.573,
+            0.708
+          ],
+          "points": [
+            [
+              0.528,
+              0.54,
+              1
+            ],
+            [
+              0.526,
+              0.584,
+              1
+            ],
+            [
+              0.52,
+              0.635,
+              1
+            ],
+            [
+              0.512,
+              0.688,
+              1
+            ],
+            [
+              0.619,
+              0.585,
+              0
+            ],
+            [
+              0.456,
+              0.635,
+              0
+            ]
+          ]
+        }
+      ],
+      "refine": "vitmatte"
+    },
+    {
+      "index": 6,
+      "subject": "The conical-hat person, bicycle and luggage; exclude buildings",
+      "backend": "birefnet",
+      "source_sha256": "3c822857310057bd7f507c06d27f524b85fef84d14d0ff6eeac65feb96f0a805"
+    },
+    {
+      "index": 7,
+      "subject": "Only the black-clothed woman and visible limbs; exclude other people and banner",
+      "backend": "sam2",
+      "source_sha256": "07eb1c2b72d53a9a8043db1888f25705f1f8d6a846cce9ca85ab4db479634dfd",
+      "objects": [
+        {
+          "box": [
+            0.399,
+            0.452,
+            0.576,
+            0.845
+          ],
+          "points": [
+            [
+              0.482,
+              0.496,
+              1
+            ],
+            [
+              0.476,
+              0.578,
+              1
+            ],
+            [
+              0.468,
+              0.674,
+              1
+            ],
+            [
+              0.445,
+              0.748,
+              1
+            ],
+            [
+              0.517,
+              0.766,
+              1
+            ],
+            [
+              0.426,
+              0.809,
+              1
+            ],
+            [
+              0.432,
+              0.45,
+              0
+            ],
+            [
+              0.536,
+              0.469,
+              0
+            ],
+            [
+              0.604,
+              0.633,
+              0
+            ],
+            [
+              0.498,
+              0.801,
+              0
+            ]
+          ]
+        }
+      ],
+      "refine": "vitmatte"
+    },
+    {
+      "index": 8,
+      "subject": "The cyclist, bicycle and bicycle bags; exclude street and buildings",
+      "backend": "birefnet",
+      "source_sha256": "6c56494da46c3965342ee4435d2e9fc5efe7e5589e6629af3780453c6606afff"
+    }
+  ]
+}

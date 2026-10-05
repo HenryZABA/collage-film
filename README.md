@@ -4,6 +4,14 @@ Turn travel, lifestyle and product photos into subject-first reveal videos with 
 
 把一组照片做成「下一张主体先出现 → 原位补全整张照片」的视频。Agent 逐张看图选择主体，调用本地模型抠图与精修，再用 HyperFrames 组合音乐、调色和转场。
 
+## 旅行实测
+
+8 张新旅行照片，4.8 秒，9:16，原创预览音乐与暖色胶片调色。6 张使用自动前景，2 张指定人物后精修。
+
+![旅行短样](examples/travel/preview.gif)
+
+[下载完整 MP4 和 Skill 包](https://github.com/HenryZABA/collage-film/releases/tag/v0.3.0) · [素材来源、主体选择和复现步骤](examples/travel/README.md)
+
 ## 使用
 
 在 Codex 或支持本地 `SKILL.md` 的 Agent 中安装此仓库。可以直接让 Agent 执行：
