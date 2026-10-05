@@ -1,0 +1,13 @@
+GSAP 3.14.2
+https://gsap.com
+
+Copyright 2025, GreenSock. All rights reserved.
+Subject to the terms at https://gsap.com/standard-license.
+Author: Jack Doyle, jack@greensock.com
+
+This file preserves the licensing notice from the unmodified gsap.min.js
+distribution. GSAP is a third-party dependency and is governed by its own
+Standard License at the URL above, not by any license applied to the surrounding
+skill or generated project. The copyright notice is also retained in the bundle.
+
+Bundle source: https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js
