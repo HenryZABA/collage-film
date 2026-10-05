@@ -4,6 +4,10 @@ A reusable, forkable Agent Skill that turns photos into subject-first reveal vid
 
 The current version plans the story, pacing and framing before building an editable HyperFrames project. It combines local subject segmentation, edge refinement, music and color grading.
 
+## Preview
+
+![Preview](examples/travel/story/preview.gif)
+
 ## Install
 
 Ask your Agent:
