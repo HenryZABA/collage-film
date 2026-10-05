@@ -1,48 +1,60 @@
 # Collage Film
 
-Turn travel, lifestyle and product photos into subject-first reveal videos with a reusable, forkable Agent Skill.
+A reusable, forkable Agent Skill that turns photos into subject-first reveal videos. The subject from the next photo appears over the current scene, followed by its full photo in the same position.
 
-把一组照片做成「下一张主体先出现 → 原位补全整张照片」的视频。Agent 逐张看图选择主体，调用本地模型抠图与精修，再用 HyperFrames 组合音乐、调色和转场。
+The current version plans the story, pacing and framing before building an editable HyperFrames project. It combines local subject segmentation, edge refinement, music and color grading.
 
-## 旅行实测
+## Install
 
-8 张新旅行照片，4.8 秒，9:16，原创预览音乐与暖色胶片调色。6 张使用自动前景，2 张指定人物后精修。
+Ask your Agent:
 
-![旅行短样](examples/travel/preview.gif)
+> Install https://github.com/HenryZABA/collage-film as a Skill and complete its local setup.
 
-[下载完整 MP4 和 Skill 包](https://github.com/HenryZABA/collage-film/releases/tag/v0.3.0) · [素材来源、主体选择和复现步骤](examples/travel/README.md)
-
-## 有剪辑脚本的新版
-
-先定“出发 → 城市 → 山野 → 湖面”的概念故事，再执行远近交替与逐镜头拍数。小主体适度放大/移位，街市和结尾多留一拍；横图改用更高分辨率原片。共6秒。
-
-![新版旅行短样](examples/travel/story/preview.gif)
-
-[查看逐镜头脚本与复现步骤](examples/travel/story/README.md) · [新版 Skill ZIP / MP4](https://github.com/HenryZABA/collage-film/releases/tag/v0.4.0)
-
-## 使用
-
-在 Codex 或支持本地 `SKILL.md` 的 Agent 中安装此仓库。可以直接让 Agent 执行：
-
-> 从 https://github.com/HenryZABA/collage-film 安装这个 Skill，并完成本机首次配置。然后用它把我的旅行照片做成视频，先问我平台、比例和音乐偏好。
-
-或手动克隆到技能目录（目标目录需为空）：
+Or clone it into an empty skill directory:
 
 ```bash
 git clone https://github.com/HenryZABA/collage-film.git ~/.codex/skills/collage-film
 ```
 
-安装后调用：
+A packaged Skill is available in the [latest release](https://github.com/HenryZABA/collage-film/releases/latest).
 
-> 用 $collage-film 处理这个文件夹里的照片，发小红书，3:4，音乐用我提供的文件。咖啡图只要前面那只杯子。
+## Use
 
-Agent 会询问缺失的发布平台、画幅、素材顺序和音乐选择；选择主体、检查抠图、构建可编辑工程，并按要求导出 MP4。它不会自动发布到社交平台。
+> Use $collage-film to turn the photos in this folder into a travel video for Instagram Reels, 9:16. Use my music file. Plan the story and alternate subject sizes before assembling the video.
 
-## 首次初始化
+For selective cutouts:
 
-照片分割在本机进行。三个模型权重约 627 MB，Python 运行依赖另算；模型、虚拟环境和照片都不会随仓库或 fork 复制。同一机器上的 fork 可复用缓存。
+> Keep only the person holding the camera. Exclude the vehicle and other people.
 
-需要 Python 3.11/3.12（本机兼容环境也可用）、Node.js、FFmpeg；macOS SAM 原生构建需要 Apple Command Line Tools。Agent 可以代为执行：
+The Agent asks for missing platform, aspect ratio and music preferences, inspects the photos, and prepares a short editing script. It then reviews the cutouts, builds the project and exports an MP4 when requested. It does not publish to social platforms automatically.
+
+## Workflow
+
+1. **Plan the edit.** Define a story, photo order, each shot's purpose and connection, beat count, subject size and placement. Use wide shots intentionally and alternate them with closer subjects where the story benefits.
+2. **Select and isolate subjects.** The Agent inspects each photo. BiRefNet handles automatic foreground extraction; SAM 2.1 uses Agent-authored boxes and points for specific objects. ViTMatte refines SAM mask edges.
+3. **Execute the script.** Apply the planned order, timing, zoom and subject anchors. Report pixel enlargement, cropping and runs of small subjects. Photos and cutouts share the same framing so the background reveal stays aligned.
+4. **Assemble and review.** Add music and consistent grading in HyperFrames. Inspect subject detail, transition frames and the final video before delivery.
+
+Story and composition decisions come from the Agent's visual judgment. The tools execute and measure the plan; they do not automatically infer a story or guarantee image quality.
+
+## Features
+
+- Executable editing scripts for story order, per-shot beats, zoom and placement.
+- Local automatic or targeted cutouts, including multiple selected subjects.
+- Edge refinement that preserves source RGB and full-canvas alignment.
+- Editable HyperFrames projects and MP4 exports.
+- Aspect ratios: 9:16, 3:4, 4:5, 1:1 and 16:9.
+- User-provided music, original procedural preview music or silence.
+- Warm-film, cool-editorial or original-color treatment.
+- Forkable personal presets for pacing, color and style.
+
+Timing uses a known constant BPM or explicit durations. The reference preset uses one beat per photo; at 100 BPM that is 0.6 seconds, with a 0.2-second subject prelude. Editing scripts can vary these choices shot by shot.
+
+## Local setup
+
+Requires Python with Pillow and NumPy, Node.js, FFmpeg and the segmentation runtimes. Python 3.11 or 3.12 is recommended for a new environment. The native SAM backend on macOS also needs Apple Command Line Tools.
+
+The Agent can run the setup scripts for you:
 
 ```bash
 python3 scripts/setup_birefnet.py
@@ -51,37 +63,39 @@ python3 scripts/setup_vitmatte.py
 python3 scripts/make.py --doctor
 ```
 
-这些 setup 自动下载固定版本与哈希校验的模型；普通抠图调用不会暗中安装依赖。默认缓存 `~/.cache/collage-film`，可设置 `COLLAGE_FILM_CACHE`。推理离线，照片不上传。完整配置与许可见 [模型说明](references/cutout.md)。
+Setup downloads pinned, hash-verified model files. The three model weights total approximately 627 MB; runtime dependencies require additional space. Models and isolated environments are stored outside the Skill in `~/.cache/collage-film`, configurable with `COLLAGE_FILM_CACHE`. Forks on the same machine can reuse this cache.
 
-## 已实现
+Segmentation runs locally without uploading photos. Models, environments and user media are not bundled into a fork. See the [backend setup and licenses](references/cutout.md) for details.
 
-- **主体判断：** Agent 实际看图，记录保留/排除对象；多个共同主体分别提示后合并。
-- **自动前景：** BiRefNet；指定对象采用 SAM 2.1 的框和点。SAM 2 的主体文字用于记录，模型接收几何提示。
-- **边缘精修：** SAM mask → trimap → ViTMatte；保持原照片 RGB、全画布尺寸和对位。
-- **视频：** HyperFrames 可编辑项目与 MP4；9:16、3:4、4:5、1:1、16:9。
-- **剪辑脚本：** 先定故事线与逐镜头衔接，实际执行顺序、拍数、主体大小与位置；记录像素放大和连续小主体提示。详见 [剪辑脚本](references/editing-script.md)。
-- **节奏：** 一拍快切或一/两拍交替；默认 100 BPM 下每图 0.6 秒，主体提前 0.2 秒。
-- **声音和颜色：** 用户音乐、原创简易预览音乐或静音；暖色胶片、冷色或原色。
-- **fork：** 自动改名并保留个人风格预设。
+## Fork your own version
 
-## 自己的版本
-
-可以让 Agent 执行：
-
-> fork $collage-film 成 my-travel-film，保存我喜欢的配色和切换节奏。
+> Fork $collage-film as my-travel-film and save my preferred pacing and color treatment.
 
 ```bash
-python3 scripts/fork.py --name my-travel-film --destination ~/.codex/skills/my-travel-film
+python3 scripts/fork.py \
+  --name my-travel-film \
+  --destination ~/.codex/skills/my-travel-film
 ```
 
-新 Skill 的配置在 `assets/preset.json`。用户照片、音乐、登录态与模型缓存不进入 fork。完整流程见 [SKILL.md](SKILL.md)，脚本参数和视频工程格式见 [操作说明](references/operations.md)。
+The destination must not already exist. Customize `assets/preset.json` in the new Skill. Photos, music, credentials and model caches are excluded.
 
-## 验证范围
+## Outputs and documentation
 
-macOS / Apple Silicon 上实际验证了模型推理、逐图主体选择、边缘精修、独立 fork、9:16 与3:4导出。咖啡杯可以选择两杯或仅前杯；测试中杯身误抠除和边缘锯齿得到改善。
+Deliverables include the editing script, framing review, transparent cutouts, source records, `job.json`, an editable HyperFrames project and an MP4 when rendering is requested.
 
-复杂叶片、透明材质、遮挡和相近颜色仍需看图复查。棕榈测试的叶间天空残留未通过。模型自估分数、alpha 非空或脚本通过都不是视觉验收；Windows/Linux、CPU 与 4K 精修未完整验证。任意歌曲自动检测拍点尚未实现，节奏使用已知 BPM 或手工时间。
+- [Skill workflow](SKILL.md)
+- [Editing script format and execution](references/editing-script.md)
+- [Tool usage and project format](references/operations.md)
+- [Subject selection plans](references/subject-selection.md)
 
-## 许可
+## Limits
 
-本项目原创代码和文档采用 [MIT](LICENSE)。GSAP、模型权重和上游实现各自遵循独立许可，见 [第三方说明](THIRD_PARTY_NOTICES.md)。图库素材和音乐的许可独立于代码许可。
+Validated on macOS / Apple Silicon for model inference, targeted subject selection, edge refinement, executable editing plans, independent forks and 9:16 / 3:4 video exports. Windows, Linux, CPU-only operation and 4K refinement have not been fully validated.
+
+Complex foliage, transparent materials, occlusion and similar foreground/background colors still require visual review. Enlarging a subject cannot recover motion-blurred detail or hidden anatomy; prefer higher-resolution originals, a different crop, a different photo or a deliberate wide shot when appropriate.
+
+A non-empty alpha mask or passing technical check is not visual acceptance. Automatic beat detection for arbitrary songs is not implemented.
+
+## License
+
+Original project code and documentation are licensed under [MIT](LICENSE). GSAP, model weights and upstream implementations retain their own licenses; see [third-party notices](THIRD_PARTY_NOTICES.md). Photo and music rights are separate from the code license.
