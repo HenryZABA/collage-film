@@ -1,0 +1,41 @@
+# 制作前的剪辑脚本
+
+先看完整组照片，用一句话定概念故事，再写每张镜头的作用、接上一张的理由、拍数、主体尺度与构图。旅行图库只能组织概念蒙太奇，不能编造真实连续行程。用户已指定顺序或固定节奏时保留其选择；缺少必要素材时可省略弱图，不靠重复或拖长凑片。
+
+先输出简短的 `EDIT-SCRIPT.md`，随后实际执行。通常判断：
+
+- 顺序：出发、经历、变化、收束，或用户明确选择的故事。颜色、运动方向和主体形状可以辅助衔接，不能代替叙事理由。
+- 节奏：清楚的近景可以快切；新场景、复杂图和收束可以多留一拍。默认一拍只作为起点，不能每张无差别套用。
+- 尺度：把每张主体在最终画幅中的高度排成一列。连续小主体容易失去视觉重心；结合意义插入近景、换顺序、换选图。远景也可以是有意的呼吸，不能把“小”一律视为失败。
+- 位置：先尝试原图裁切锚点，再轻放大和移动整幅照片；照片与 mask 共用全部变换，补全背景时不跳位。移位若露出空边，工具会限制位置。需要独立摆放的贴纸构图应明确选择 editorial 风格，不暗中改变原位揭示。
+- 画质：先索取/使用高分辨率原片。记录输出像素与源像素倍率；1.25× 是复查提示，并非清晰度保证。源图运动模糊、遮挡、抠图缺失不能靠放大恢复。预览接近交付尺寸的主体细节后再决定是否接受。
+
+## 可执行计划
+
+对准备好的 `job.json`，Agent 看其归一化照片写 `edit-script.json`。`source_index` 指原 job 的 1-based 序号；`source_sha256` 是 `photo` 文件的 SHA256，避免换图后沿用旧判断。每张最多使用一次，可省略。所有字段有实际作用，叙事理由由 Agent 写，工具不假称自动理解故事。
+
+```json
+{
+  "schema_version": 1,
+  "story": "出发、城市漫游、山野、远景收束；概念旅行蒙太奇",
+  "bpm": 100,
+  "shots": [
+    {"source_index":1,"source_sha256":"NORMALIZED_PHOTO_SHA256","role":"出发","connection":"建立旅程起点","beats":1,"lead_in":0,"zoom":1,"quality_note":"主体已够大，保持原幅"},
+    {"source_index":2,"source_sha256":"NORMALIZED_PHOTO_SHA256","role":"路上停靠","connection":"从车辆连接到拍照的人","beats":2,"lead_in":0.2,"zoom":1.2,"anchor":{"x":0.5,"y":0.6},"quality_note":"轻裁切；检查主体细节后接受"}
+  ]
+}
+```
+
+`zoom` 为最终画幅的1–3倍，`anchor` 为主体 bbox 中心在画幅中的目标位置（0–1）。位置受照片覆盖画幅限制；报告实际变换与限制。`beats` 按已知恒定 BPM 换算；没有自动检测任意音乐节拍。
+
+```bash
+python3 "$SKILL_DIR/scripts/edit_plan.py" \
+  --job /path/film/job.json --script /path/edit-script.json \
+  --out /path/film/job-story.json
+node "$SKILL_DIR/scripts/build.mjs" \
+  --config /path/film/job-story.json --out /path/film/story-project
+```
+
+生成可执行 job、`job-story.edit-script.md` 和 `job-story.edit-review.json`，记录时间、主体高度、像素倍率、裁切和连续小主体。警告是检查线索，不是自动审美决策。
+
+也可将同样计划传给 `make.py --edit-script FILE`，按 `--images` 的原始序号引用，哈希仍绑定该照片经 EXIF 归一化并保存为 PNG 的内容。此时脚本拥有顺序与时长，不与 `--pace`、均匀秒数或均匀拍数同时使用。音乐生成采用脚本 BPM 和新时长；原始主体计划仍按输入序号处理。必须先复查抠图，构建后复查大小、叠入中间帧与背景接管帧。

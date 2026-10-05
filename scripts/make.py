@@ -31,6 +31,7 @@ def main():
     p.add_argument('--lead-in',type=float,help='Cutout lead-in in seconds (0..1); default preset .2, about 6 frames at 30 fps. Capped at half the preceding photo duration')
     p.add_argument('--skip-cutout',default='',help='Comma-separated 1-based image indices for intentional full-photo cuts')
     p.add_argument('--backend',choices=['auto','birefnet','sam2','vision','rembg'],default='auto')
+    p.add_argument('--edit-script',type=Path,help='Agent-authored story/order/beat/zoom/anchor plan; see references/editing-script.md')
     p.add_argument('--subjects',type=Path,help='Agent-reviewed per-photo subject plan; schema_version=1, images with index, subject, backend and optional SAM 2 objects')
     p.add_argument('--refine',choices=['auto','none','vitmatte'],default='auto',help='SAM 2 edges: auto uses installed ViTMatte; per-image plan can override this')
     m=p.add_mutually_exclusive_group()
@@ -57,6 +58,8 @@ def main():
     if a.output.expanduser().exists():p.error('Output exists; choose a fresh project directory')
     if not all(x.expanduser().is_file() for x in a.images):p.error('Every image path must exist')
     if a.music and not a.music.expanduser().is_file():p.error('Music file does not exist')
+    if a.edit_script and not a.edit_script.expanduser().is_file():p.error('Editing script does not exist')
+    if a.edit_script and (a.seconds_per_photo is not None or a.beats_per_photo is not None or a.pace is not None):p.error('--edit-script owns order and durations; do not combine with uniform timing or --pace')
     try:
         skip={int(x.strip()) for x in a.skip_cutout.split(',') if x.strip()}
     except ValueError:p.error('--skip-cutout expects comma-separated integers')
@@ -90,7 +93,10 @@ def main():
     if a.refine=='vitmatte' and a.backend!='sam2' and any(i not in skip and i not in subject_plans for i in range(1,len(a.images)+1)):
         p.error('Explicit ViTMatte refinement requires SAM 2 for every unplanned photograph; use per-image refine overrides in --subjects for mixed backends')
     preset=json.loads((ROOT/'assets/preset.json').read_text())
-    bpm=a.bpm if a.bpm is not None else preset.get('bpm',100)
+    script=json.loads(a.edit_script.expanduser().read_text()) if a.edit_script else None
+    if script is not None and not isinstance(script,dict):p.error('Editing script must be an object')
+    bpm=script.get('bpm') if script is not None else a.bpm if a.bpm is not None else preset.get('bpm',100)
+    if script is not None and a.bpm is not None and a.bpm!=bpm:p.error('--bpm conflicts with the editing script BPM')
     pace=a.pace if a.pace is not None else preset.get('pace','reference')
     lead=a.lead_in if a.lead_in is not None else preset.get('transitionSeconds',.2)
     def finite_number(value):
@@ -98,7 +104,10 @@ def main():
     if not finite_number(bpm) or not 40<=bpm<=240:p.error('BPM must be a finite number in 40..240')
     if pace not in ['reference','breathing']:p.error('Preset pace must be reference or breathing')
     if not finite_number(lead) or not 0<=lead<=1:p.error('lead-in must be a finite number in 0..1 seconds')
-    if a.seconds_per_photo is not None:
+    if a.edit_script:
+        # The script owns timing; placeholder source shots are only used during segmentation.
+        photo_durations=[.6]*len(a.images);timing_mode='edit-script-pending'
+    elif a.seconds_per_photo is not None:
         if not finite_number(a.seconds_per_photo) or not .4<=a.seconds_per_photo<=30:p.error('seconds-per-photo must be .4..30')
         photo_durations=[a.seconds_per_photo]*len(a.images);timing_mode='uniform-seconds'
     elif a.beats_per_photo is not None:
@@ -161,6 +170,16 @@ def main():
                 scene['position']={'x':round(px,6),'y':round(py,6)}
         elif a.fit!='auto':scene['fit']=a.fit
         scenes.append(scene)
+    edit_report=None
+    if a.edit_script:
+        from edit_plan import apply_plan, markdown
+        planned,edit_report=apply_plan({'style':'cutout-reveal','ratio':a.ratio,'scenes':scenes},script,out)
+        scenes=planned['scenes'];bpm=edit_report['bpm'];duration=round(edit_report['duration']+(2 if a.end_title else 0),6)
+        photo_durations=[s['duration'] for s in scenes];lead_ins=[s['leadIn'] for s in scenes];timing_mode='edit-script'
+        warnings.extend(edit_report['warnings'])
+        (out/'edit-script.json').write_text(json.dumps(script,ensure_ascii=False,indent=2)+'\n')
+        (out/'EDIT-SCRIPT.md').write_text(markdown(edit_report))
+        (out/'edit-review.json').write_text(json.dumps(edit_report,ensure_ascii=False,indent=2)+'\n')
     bgm=None
     if a.demo_music:
         music=inputs/'original-preview-bed.wav'
@@ -176,7 +195,7 @@ def main():
     if bgm:job['bgm']=bgm
     (out/'job.json').write_text(json.dumps(job,ensure_ascii=False,indent=2)+'\n')
     timing={'mode':timing_mode,'pace':pace if timing_mode=='pace' else None,'bpm':bpm,'photo_durations':photo_durations,'requested_lead_in':lead,'lead_in_seconds':lead_ins,'beat_detection':False}
-    (out/'sources.json').write_text(json.dumps({'images':sources,'subjects':list(subject_plans.values()),'music':{'mode':'original-procedural-preview' if a.demo_music else 'user-supplied' if a.music else 'none','bpm_grid':bpm if a.demo_music or a.bpm else None,'beat_detection':False},'timing':timing,'warnings':warnings},ensure_ascii=False,indent=2)+'\n')
+    (out/'sources.json').write_text(json.dumps({'images':sources,'subjects':list(subject_plans.values()),'music':{'mode':'original-procedural-preview' if a.demo_music else 'user-supplied' if a.music else 'none','bpm_grid':bpm if a.demo_music or a.bpm or a.edit_script else None,'beat_detection':False},'timing':timing,'editing':edit_report,'warnings':warnings},ensure_ascii=False,indent=2)+'\n')
     call(['node',ROOT/'scripts/build.mjs','--config',out/'job.json','--out',out/'project'])
     if a.check or a.render:call(['npm','run','check','--','--snapshots'],cwd=out/'project')
     if a.render:call(['npm','run','render','--','--quality','looks','--output',out/'video.mp4'],cwd=out/'project')

@@ -109,15 +109,19 @@ function main() {
   const scenes = input.scenes.map((s, index) => {
     const name = `scenes[${index}]`;
     if (style === 'cutout-reveal') {
-      keys(s, ['duration', 'photo', 'cutout', 'leadIn', 'position', 'fit', 'title', 'subtitle'], name);
+      keys(s, ['duration', 'photo', 'cutout', 'leadIn', 'position', 'fit', 'framing', 'title', 'subtitle'], name);
       const sceneDuration = number(s.duration, 0.65, 0.4, 30, `${name}.duration`);
       const photo = asset(s.photo, `${name}.photo`, 'background');
       const cutout = s.cutout ? asset(s.cutout, `${name}.cutout`, 'cutout') : null;
       if (cutout && (photo.width !== cutout.width || photo.height !== cutout.height)) fail(`${name}: photo and cutout must have exactly the same full-canvas pixel dimensions; do not trim transparent margins`);
       const position = s.position ?? {};
       keys(position, ['x', 'y'], `${name}.position`);
+      const framing = s.framing ?? {};
+      keys(framing, ['zoom', 'x', 'y'], `${name}.framing`);
+      const frame = { zoom: number(framing.zoom, 1, 1, 3, `${name}.framing.zoom`), x: number(framing.x, 0, -.5, .5, `${name}.framing.x`), y: number(framing.y, 0, -.5, .5, `${name}.framing.y`) };
+      if ((s.fit ?? 'cover') === 'cover' && (Math.abs(frame.x) > (frame.zoom - 1) / 2 + .000001 || Math.abs(frame.y) > (frame.zoom - 1) / 2 + .000001)) fail(`${name}.framing translation exposes empty edges; increase zoom or reduce shift`);
       const leadIn = index === 0 ? 0 : number(s.leadIn, 0.25, 0, Math.min(1, input.scenes[index - 1].duration ?? 0.65), `${name}.leadIn`);
-      const scene = { id: `scene-${index}`, start: round(duration), duration: sceneDuration, photo, cutout, leadIn, fit: choice(s.fit, 'cover', ['cover', 'contain'], `${name}.fit`), position: { x: number(position.x, 0.5, 0, 1, `${name}.position.x`), y: number(position.y, 0.5, 0, 1, `${name}.position.y`) }, title: text(s.title, '', 100, `${name}.title`), subtitle: text(s.subtitle, '', 180, `${name}.subtitle`) };
+      const scene = { id: `scene-${index}`, start: round(duration), duration: sceneDuration, photo, cutout, leadIn, framing: frame, fit: choice(s.fit, 'cover', ['cover', 'contain'], `${name}.fit`), position: { x: number(position.x, 0.5, 0, 1, `${name}.position.x`), y: number(position.y, 0.5, 0, 1, `${name}.position.y`) }, title: text(s.title, '', 100, `${name}.title`), subtitle: text(s.subtitle, '', 180, `${name}.subtitle`) };
       duration = round(duration + sceneDuration);
       return scene;
     }
@@ -189,8 +193,9 @@ function main() {
       const objectPosition = `${round(s.position.x * 100)}% ${round(s.position.y * 100)}%`;
       gradeTargets.push(`#photo-${i}`);
       if (s.cutout && s.leadIn > 0) gradeTargets.push(`#cutout-${i}`);
-      return `<img id="photo-${i}" class="clip aligned-photo" data-start="${s.start}" data-duration="${s.duration}" data-track-index="${i * 2}" data-label="Photo ${i + 1}" src="${s.photo.path}" style="object-fit:${s.fit};object-position:${objectPosition};background:${palette.background}" alt="" />
-      ${s.cutout && s.leadIn > 0 ? `<img id="cutout-${i}" class="clip aligned-photo reveal" data-start="${round(s.start - s.leadIn)}" data-duration="${s.leadIn}" data-track-index="${i * 2 + 1}" data-label="Cutout ${i + 1}" src="${s.cutout.path}" style="object-fit:${s.fit};object-position:${objectPosition}" alt="" />` : ''}
+      const geometry = `object-fit:${s.fit};object-position:${objectPosition};transform:translate(${round(s.framing.x * width)}px,${round(s.framing.y * height)}px) scale(${s.framing.zoom});transform-origin:center center`;
+      return `<img id="photo-${i}" class="clip aligned-photo" data-start="${s.start}" data-duration="${s.duration}" data-track-index="${i * 2}" data-label="Photo ${i + 1}" data-layout-allow-overflow src="${s.photo.path}" style="${geometry};background:${palette.background}" alt="" />
+      ${s.cutout && s.leadIn > 0 ? `<img id="cutout-${i}" class="clip aligned-photo reveal" data-start="${round(s.start - s.leadIn)}" data-duration="${s.leadIn}" data-track-index="${i * 2 + 1}" data-label="Cutout ${i + 1}" data-layout-allow-overflow src="${s.cutout.path}" style="${geometry}" alt="" />` : ''}
       ${s.title || s.subtitle ? `<p id="shot-caption-${i}" class="clip shot-caption" data-start="${s.start}" data-duration="${s.duration}" data-track-index="${121 + i}">${html(s.title)}${s.title && s.subtitle ? '\n' : ''}${html(s.subtitle)}</p>` : ''}`;
     }
     const background = s.background ? `<img id="background-${i}" class="scene-background" src="${s.background.path}" alt="" />` : '';
@@ -262,7 +267,7 @@ window.__timelines['collage-film']=tl;
       if (!result.ok) fail(`HyperFrames rejected ${grade} for ${selector}: ${JSON.stringify(result)}`);
     }
   }
-  const portable = { schemaVersion: 1, title, style, platform, ratio, fps, grade, palette, ...(overlay ? { overlay } : {}), ...(endCard ? { endCard } : {}), ...(fontPath ? { font: fontPath } : {}), ...(bgm ? { bgm: { path: bgm.path, volume: bgm.volume, fadeIn: bgm.fadeIn, fadeOut: bgm.fadeOut, offset: 0, loop: false } } : {}), scenes: scenes.map(s => style === 'cutout-reveal' ? { duration: s.duration, photo: s.photo.path, ...(s.cutout ? { cutout: s.cutout.path } : {}), leadIn: s.leadIn, position: s.position, fit: s.fit, title: s.title, subtitle: s.subtitle } : { duration: s.duration, title: s.title, subtitle: s.subtitle, ...(s.background ? { background: s.background.path } : {}), layers: s.layers.map(l => ({ path: l.path, x: l.x, y: l.y, width: l.widthFraction, rotation: l.rotation, motion: l.motion })) }) };
+  const portable = { schemaVersion: 1, title, style, platform, ratio, fps, grade, palette, ...(overlay ? { overlay } : {}), ...(endCard ? { endCard } : {}), ...(fontPath ? { font: fontPath } : {}), ...(bgm ? { bgm: { path: bgm.path, volume: bgm.volume, fadeIn: bgm.fadeIn, fadeOut: bgm.fadeOut, offset: 0, loop: false } } : {}), scenes: scenes.map(s => style === 'cutout-reveal' ? { duration: s.duration, photo: s.photo.path, ...(s.cutout ? { cutout: s.cutout.path } : {}), leadIn: s.leadIn, position: s.position, fit: s.fit, framing: s.framing, title: s.title, subtitle: s.subtitle } : { duration: s.duration, title: s.title, subtitle: s.subtitle, ...(s.background ? { background: s.background.path } : {}), layers: s.layers.map(l => ({ path: l.path, x: l.x, y: l.y, width: l.widthFraction, rotation: l.rotation, motion: l.motion })) }) };
   fs.writeFileSync(path.join(output, 'job.resolved.json'), JSON.stringify(portable, null, 2) + '\n');
   const report = { ok: true, project: output, composition: 'index.html', duration, width, height, ratio, fps, platform, style, grade, sceneCount: scenes.length, imageCount: gradeTargets.length, bgm: Boolean(bgm), grading: GRADES[grade], safeArea: safe, assets: [...assetCache.values()], warnings: fontPath ? [] : ['No bundled font was supplied; system fonts depend on the render machine. Supply job.font for portable typography.'], next: `node ${JSON.stringify(path.join(output, 'check.mjs'))} --project ${JSON.stringify(output)}` };
   fs.writeFileSync(path.join(output, 'build-report.json'), JSON.stringify(report, null, 2) + '\n');

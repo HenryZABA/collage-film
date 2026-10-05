@@ -42,6 +42,12 @@ python3 "$SKILL_DIR/scripts/make.py" \
 
 四张照片在默认 reference 下只够2.4秒，在 breathing 下只够3.6秒，均不含可选结尾。它们用于检验节奏与转场。更长的成片需要更多新照片；不应为了凑时长把每张延长为数秒。breathing 是可替换的节奏示例，不分析人物或画面复杂度；实际音乐有变速或画面需要不同停留时长时，逐张调整 `job.json` 的 `duration` 和 `leadIn`。`sources.json` 的 `timing` 记录本次模式、实际时长和提前量，`beat_detection` 始终为 false。
 
+## 故事线、主体大小与位置
+
+制作前按 [剪辑脚本](editing-script.md) 写逐镜头计划，并用 `scripts/edit_plan.py` 执行。`make.py --edit-script FILE` 也可直接使用，脚本拥有顺序、拍数和BPM；不与 `--pace` 或均匀时长参数同时使用。
+
+`job.json` 每张可增加 `framing: {"zoom":1.2,"x":0.02,"y":-0.01}`。zoom是整幅画面的倍率，x/y是相对画幅宽高的位移；照片与抠图共用同样参数。cover模式不允许移位露出空边。最终还是需要看主体完整性和实际清晰度。
+
 ## 编辑与重新构建
 
 ```bash

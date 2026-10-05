@@ -1,0 +1,135 @@
+{
+  "photos": [
+    {
+      "name": "van",
+      "file": "input/van.jpg",
+      "page": "https://unsplash.com/photos/pHgJ6zYvTc4",
+      "image_url": "https://images.unsplash.com/photo-1775458014077-f60db9657a52?auto=format&fit=max&w=1600&q=88&fm=jpg",
+      "author": "Dan Begel",
+      "license": "Unsplash License",
+      "license_url": "https://unsplash.com/license",
+      "license_verified_at": "2026-10-05",
+      "rights": "Downloaded free photo verified as standard Unsplash License; modified collage/video demonstration, not a competing photo library",
+      "dimensions": [
+        1600,
+        2400
+      ],
+      "sha256": "1faa74693a738d0438f2c00fdf8d051ac568b016b1acaca1960d5ea5742b574f"
+    },
+    {
+      "name": "coastal-camper",
+      "file": "input/coastal-camper.jpg",
+      "page": "https://unsplash.com/photos/tmayqDNex-w",
+      "image_url": "https://images.unsplash.com/photo-1758191836286-2587e4858a9c?auto=format&fit=max&w=1600&q=88&fm=jpg",
+      "author": "Ilinca Roman",
+      "license": "Unsplash License",
+      "license_url": "https://unsplash.com/license",
+      "license_verified_at": "2026-10-05",
+      "rights": "Downloaded free photo verified as standard Unsplash License; modified collage/video demonstration, not a competing photo library",
+      "dimensions": [
+        1600,
+        2400
+      ],
+      "sha256": "519ba0befacabd010549ad4e3aa19db4cb39eaf8c5e079d25bd7a5803eb0e275"
+    },
+    {
+      "name": "hanoi",
+      "file": "input/hanoi.jpg",
+      "page": "https://unsplash.com/photos/orEPbNAgwvM",
+      "image_url": "https://images.unsplash.com/photo-1769942782142-82cf4a8362d8?auto=format&fit=max&w=1600&q=88&fm=jpg",
+      "author": "Tuaans",
+      "license": "Unsplash License",
+      "license_url": "https://unsplash.com/license",
+      "license_verified_at": "2026-10-05",
+      "rights": "Downloaded free photo verified as standard Unsplash License; modified collage/video demonstration, not a competing photo library",
+      "dimensions": [
+        1600,
+        2400
+      ],
+      "sha256": "3c822857310057bd7f507c06d27f524b85fef84d14d0ff6eeac65feb96f0a805"
+    },
+    {
+      "name": "lake-boat",
+      "file": "high-res/lake-boat.jpg",
+      "page": "https://unsplash.com/photos/7SM8Qy7TqbU",
+      "image_url": "https://images.unsplash.com/photo-1773658949569-51fef274d649?auto=format&fit=max&w=3200&q=88&fm=jpg",
+      "author": "sayan Nath",
+      "license": "Unsplash License",
+      "license_url": "https://unsplash.com/license",
+      "license_verified_at": "2026-10-05",
+      "rights": "Downloaded free photo verified as standard Unsplash License; modified collage/video demonstration, not a competing photo library",
+      "dimensions": [
+        3200,
+        2400
+      ],
+      "sha256": "aecafb641e40a89fce5e5dd689bdfef85b3c5286439c1217a049353327393063"
+    },
+    {
+      "name": "street-market",
+      "file": "input/street-market.jpg",
+      "page": "https://unsplash.com/photos/S2Fl6B_wE9U",
+      "image_url": "https://images.unsplash.com/photo-1766524871309-9c778fe30d71?auto=format&fit=max&w=1600&q=88&fm=jpg",
+      "author": "Haewon Oh",
+      "license": "Unsplash License",
+      "license_url": "https://unsplash.com/license",
+      "license_verified_at": "2026-10-05",
+      "rights": "Downloaded free photo verified as standard Unsplash License; modified collage/video demonstration, not a competing photo library",
+      "dimensions": [
+        1600,
+        1979
+      ],
+      "sha256": "07eb1c2b72d53a9a8043db1888f25705f1f8d6a846cce9ca85ab4db479634dfd"
+    },
+    {
+      "name": "kimono",
+      "file": "input/kimono.jpg",
+      "page": "https://unsplash.com/photos/9_aiGIn1pLM",
+      "image_url": "https://images.unsplash.com/photo-1573416503733-adbecc952e15?auto=format&fit=max&w=1600&q=88&fm=jpg",
+      "author": "Svetlana Gumerova",
+      "license": "Unsplash License",
+      "license_url": "https://unsplash.com/license",
+      "license_verified_at": "2026-10-05",
+      "rights": "Downloaded free photo verified as standard Unsplash License; modified collage/video demonstration, not a competing photo library",
+      "dimensions": [
+        1600,
+        2400
+      ],
+      "sha256": "3cf521cd7958585f35a79ba1b9463f30830c2d6cf441f963751201517593db34"
+    },
+    {
+      "name": "cyclist",
+      "file": "input/cyclist.jpg",
+      "page": "https://unsplash.com/photos/h5YTZW2l51U",
+      "image_url": "https://images.unsplash.com/photo-1773573522021-762a92a4a4fb?auto=format&fit=max&w=1600&q=88&fm=jpg",
+      "author": "Fotis Fotopoulos",
+      "license": "Unsplash License",
+      "license_url": "https://unsplash.com/license",
+      "license_verified_at": "2026-10-05",
+      "rights": "Downloaded free photo verified as standard Unsplash License; modified collage/video demonstration, not a competing photo library",
+      "dimensions": [
+        1600,
+        2218
+      ],
+      "sha256": "6c56494da46c3965342ee4435d2e9fc5efe7e5589e6629af3780453c6606afff"
+    },
+    {
+      "name": "hikers",
+      "file": "high-res/hikers.jpg",
+      "page": "https://unsplash.com/photos/Yizrl9N_eDA",
+      "image_url": "https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=max&w=3200&q=88&fm=jpg",
+      "author": "Toomas Tartes",
+      "license": "Unsplash License",
+      "license_url": "https://unsplash.com/license",
+      "license_verified_at": "2026-10-05",
+      "rights": "Downloaded free photo verified as standard Unsplash License; modified collage/video demonstration, not a competing photo library",
+      "dimensions": [
+        3200,
+        2135
+      ],
+      "sha256": "77393d9bf716cf2810486dd4ab5a3255b51ad625f8fb698f15b3f467c99c91ac"
+    }
+  ],
+  "music": "Original procedural preview music produced by Skill, not stock/original reference music",
+  "purpose": "Travel photo cutout transition test",
+  "raw_photo_distribution": "Not included in skill repository; source links and rendered demonstration only"
+}

@@ -1,0 +1,229 @@
+{
+  "schema_version": 1,
+  "story": "旅行片段的概念蒙太奇：出发 → 城市漫游 → 进入山野 → 湖面收束。素材来自不同地点，不宣称是真实连续行程。大主体与小主体交替，复杂街市和最后风景各多留一拍。",
+  "bpm": 100.0,
+  "duration": 6.0,
+  "shots": [
+    {
+      "shot": 1,
+      "source_index": 2,
+      "source_sha256": "f2f1991bd9c9dfbbacfe21d989aff976716edd204912aefdabee27e422252717",
+      "role": "出发：房车近景",
+      "connection": "用车辆建立旅行的开始",
+      "quality_note": "车辆清楚，保持原有比例",
+      "start": 0,
+      "duration": 0.6,
+      "beats": 1.0,
+      "lead_in": 0,
+      "framing": {
+        "zoom": 1.0,
+        "x": 0,
+        "y": 0
+      },
+      "pixel_scale": 0.8,
+      "subject_height_fraction": 0.2925,
+      "subject_bounds": [
+        0.0411,
+        0.5033,
+        0.9589,
+        0.7958
+      ]
+    },
+    {
+      "shot": 2,
+      "source_index": 5,
+      "source_sha256": "9f075879ba66db8a8c855a9cd9ac2b600e9f78ef5010bdd8a7163085cbdca898",
+      "role": "路上停靠：摄影者远景",
+      "connection": "从房车连接到拍照的人，暂时拉远",
+      "quality_note": "只轻放大；主体仍小，作为有环境信息的过渡",
+      "start": 0.6,
+      "duration": 0.6,
+      "beats": 1.0,
+      "lead_in": 0.2,
+      "framing": {
+        "zoom": 1.25,
+        "x": -0.02,
+        "y": -0.011146
+      },
+      "pixel_scale": 1.0,
+      "subject_height_fraction": 0.2281,
+      "subject_bounds": [
+        0.4119,
+        0.5159,
+        0.5481,
+        0.7441
+      ]
+    },
+    {
+      "shot": 3,
+      "source_index": 3,
+      "source_sha256": "1797eb840471d3bd6f778be278363edea0bf1d67ebf63de41149dbf8cd608782",
+      "role": "漫游：三人和服近景",
+      "connection": "用多人近景接住上一张小人物",
+      "quality_note": "不放大，人物本来就够大",
+      "start": 1.2,
+      "duration": 0.6,
+      "beats": 1.0,
+      "lead_in": 0.2,
+      "framing": {
+        "zoom": 1.0,
+        "x": 0,
+        "y": 0
+      },
+      "pixel_scale": 0.8,
+      "subject_height_fraction": 0.5088,
+      "subject_bounds": [
+        0.0589,
+        0.4683,
+        0.9411,
+        0.9771
+      ]
+    },
+    {
+      "shot": 4,
+      "source_index": 6,
+      "source_sha256": "c41070e7be0ff51e165329e5c515a1c40daf2c5ea50eb401361f30e93548d394",
+      "role": "城市移动：载货自行车中远景",
+      "connection": "从步行切到骑行，保持城市活动线索",
+      "quality_note": "1.3倍构图放大仍接近原像素；不追求把小人变大头像",
+      "start": 1.8,
+      "duration": 0.6,
+      "beats": 1.0,
+      "lead_in": 0.2,
+      "framing": {
+        "zoom": 1.3,
+        "x": -0.0,
+        "y": -0.026396
+      },
+      "pixel_scale": 1.04,
+      "subject_height_fraction": 0.2205,
+      "subject_bounds": [
+        0.2853,
+        0.5798,
+        0.7147,
+        0.8002
+      ]
+    },
+    {
+      "shot": 5,
+      "source_index": 7,
+      "source_sha256": "620efcc3749a2ea6ac10e13317ba9d20789419a324b632d645a94ed6e4c1c2a7",
+      "role": "走进街市：人物中景",
+      "connection": "回到更大的单人主体，给复杂街景多留一拍",
+      "quality_note": "轻裁切，遮挡保留，避免用放大补不存在的腿",
+      "start": 2.4,
+      "duration": 1.2,
+      "beats": 2.0,
+      "lead_in": 0.2,
+      "framing": {
+        "zoom": 1.08,
+        "x": -0.04,
+        "y": -0.04
+      },
+      "pixel_scale": 1.0478,
+      "subject_height_fraction": 0.4142,
+      "subject_bounds": [
+        0.3387,
+        0.4073,
+        0.5813,
+        0.8215
+      ]
+    },
+    {
+      "shot": 6,
+      "source_index": 8,
+      "source_sha256": "c486c35c24ac1373496cdd90bf0a3f835b5c289857065a0b2889aa470d52eb12",
+      "role": "离开城市：骑行者远景",
+      "connection": "以骑行连接到户外徒步",
+      "quality_note": "轻放大并调整位置；源图运动模糊不会恢复",
+      "start": 3.6,
+      "duration": 0.6,
+      "beats": 1.0,
+      "lead_in": 0.2,
+      "framing": {
+        "zoom": 1.35,
+        "x": -0.116118,
+        "y": -0.175
+      },
+      "pixel_scale": 1.1686,
+      "subject_height_fraction": 0.2495,
+      "subject_bounds": [
+        0.3328,
+        0.5466,
+        0.6672,
+        0.7961
+      ]
+    },
+    {
+      "shot": 7,
+      "source_index": 4,
+      "source_sha256": "aa502425233f36feba3955d64a432e737ce6c49c9a82a95fa715f24f6f92843b",
+      "role": "进入山野：徒步者近景",
+      "connection": "紧接小骑行者，形成明显大小对比",
+      "quality_note": "保持原幅，背包主体已经很大",
+      "start": 4.2,
+      "duration": 0.6,
+      "beats": 1.0,
+      "lead_in": 0.2,
+      "framing": {
+        "zoom": 1.0,
+        "x": 0,
+        "y": 0
+      },
+      "pixel_scale": 0.8993,
+      "subject_height_fraction": 0.6595,
+      "subject_bounds": [
+        0.1693,
+        0.2824,
+        0.8296,
+        0.9419
+      ]
+    },
+    {
+      "shot": 8,
+      "source_index": 1,
+      "source_sha256": "4189d094806e66add59309011098995cc8edfb05bbf4f3e1cb913b8cdb956059",
+      "role": "收束：湖面与小船远景",
+      "connection": "由近处的人切到开阔风景，留两拍呼吸",
+      "quality_note": "小船是刻意的远景，不强行放大模糊细节",
+      "start": 4.8,
+      "duration": 1.2,
+      "beats": 2.0,
+      "lead_in": 0.2,
+      "framing": {
+        "zoom": 1.0,
+        "x": 0,
+        "y": 0
+      },
+      "pixel_scale": 0.8,
+      "subject_height_fraction": 0.0733,
+      "subject_bounds": [
+        0.3874,
+        0.6817,
+        0.6133,
+        0.755
+      ]
+    }
+  ],
+  "omitted_source_indices": [],
+  "warnings": [
+    {
+      "shot": 5,
+      "code": "anchor_limited_by_full_frame_coverage",
+      "note": "Requested position was limited to avoid empty photo edges; choose a different crop/photo if unsuitable"
+    },
+    {
+      "shot": 6,
+      "code": "anchor_limited_by_full_frame_coverage",
+      "note": "Requested position was limited to avoid empty photo edges; choose a different crop/photo if unsuitable"
+    },
+    {
+      "shot": 8,
+      "code": "small_subject",
+      "note": "Subject under 18% of frame height; decide whether it is an intentional wide shot"
+    }
+  ],
+  "visual_review_required": true,
+  "beat_detection": false,
+  "sharpness_estimated": false
+}

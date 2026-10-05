@@ -1,0 +1,53 @@
+{
+  "status": "PASS",
+  "duration_seconds": 6,
+  "width": 1080,
+  "height": 1920,
+  "fps": 30,
+  "frames": 180,
+  "audio": "AAC stereo, original preview music",
+  "source_order": [
+    2,
+    5,
+    3,
+    6,
+    7,
+    8,
+    4,
+    1
+  ],
+  "subject_height_fractions": [
+    0.2925,
+    0.2281,
+    0.5088,
+    0.2205,
+    0.4142,
+    0.2495,
+    0.6595,
+    0.0733
+  ],
+  "pixel_scales": [
+    0.8,
+    1.0,
+    0.8,
+    1.04,
+    1.0478,
+    1.1686,
+    0.8993,
+    0.8
+  ],
+  "runtime_check": true,
+  "lint_errors": 0,
+  "lint_warnings": 0,
+  "proof_frames_reviewed": 16,
+  "photo_cutout_shared_transforms_verified": 7,
+  "regression_tests_passed": 7,
+  "make_script_integration": "PASS: ordering, beats, framing, 200 BPM override and BGM duration",
+  "high_resolution_RGB_and_canvas_preserved": true,
+  "video_sha256": "d7437068f165372952e8e34c99e85adf4a9f04ee93a131565f15b017eaca4ee8",
+  "limits": [
+    "Last boat is intentionally small",
+    "Motion-blurred or occluded source details are not reconstructed",
+    "No automatic story or arbitrary-song beat inference"
+  ]
+}

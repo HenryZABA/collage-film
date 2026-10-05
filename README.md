@@ -12,6 +12,14 @@ Turn travel, lifestyle and product photos into subject-first reveal videos with 
 
 [下载完整 MP4 和 Skill 包](https://github.com/HenryZABA/collage-film/releases/tag/v0.3.0) · [素材来源、主体选择和复现步骤](examples/travel/README.md)
 
+## 有剪辑脚本的新版
+
+先定“出发 → 城市 → 山野 → 湖面”的概念故事，再执行远近交替与逐镜头拍数。小主体适度放大/移位，街市和结尾多留一拍；横图改用更高分辨率原片。共6秒。
+
+![新版旅行短样](examples/travel/story/preview.gif)
+
+[查看逐镜头脚本与复现步骤](examples/travel/story/README.md) · [新版 Skill ZIP / MP4](https://github.com/HenryZABA/collage-film/releases/tag/v0.4.0)
+
 ## 使用
 
 在 Codex 或支持本地 `SKILL.md` 的 Agent 中安装此仓库。可以直接让 Agent 执行：
@@ -51,6 +59,7 @@ python3 scripts/make.py --doctor
 - **自动前景：** BiRefNet；指定对象采用 SAM 2.1 的框和点。SAM 2 的主体文字用于记录，模型接收几何提示。
 - **边缘精修：** SAM mask → trimap → ViTMatte；保持原照片 RGB、全画布尺寸和对位。
 - **视频：** HyperFrames 可编辑项目与 MP4；9:16、3:4、4:5、1:1、16:9。
+- **剪辑脚本：** 先定故事线与逐镜头衔接，实际执行顺序、拍数、主体大小与位置；记录像素放大和连续小主体提示。详见 [剪辑脚本](references/editing-script.md)。
 - **节奏：** 一拍快切或一/两拍交替；默认 100 BPM 下每图 0.6 秒，主体提前 0.2 秒。
 - **声音和颜色：** 用户音乐、原创简易预览音乐或静音；暖色胶片、冷色或原色。
 - **fork：** 自动改名并保留个人风格预设。
