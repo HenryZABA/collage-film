@@ -2,7 +2,7 @@
 
 A reusable, forkable Agent Skill that turns photos into subject-first reveal videos. The subject from the next photo appears over the current scene, followed by its full photo in the same position.
 
-The current version plans the story, pacing and framing before building an editable HyperFrames project. It combines local subject segmentation, edge refinement, music and color grading.
+The current version plans the story, pacing and framing before building an editable HyperFrames project. It combines local subject segmentation, adaptive white outlines, original tropical music, color grading, native 4K masters, mobile playback exports and optional photographic collage covers.
 
 ## Preview
 
@@ -34,8 +34,8 @@ The Agent asks for missing platform, aspect ratio and music preferences, inspect
 
 ## Workflow
 
-1. **Plan the edit.** Define a story, photo order, each shot's purpose and connection, beat count, subject size and placement. Use wide shots intentionally and alternate them with closer subjects where the story benefits.
-2. **Select and isolate subjects.** The Agent inspects each photo. BiRefNet handles automatic foreground extraction; SAM 2.1 uses Agent-authored boxes and points for specific objects. ViTMatte refines SAM mask edges.
+1. **Plan the edit.** Inventory every input and retain full coverage unless the user authorizes curation. Define a story, photo order, each shot's purpose and connection, beat count, subject size and placement. Use wide shots intentionally and alternate them with closer subjects where the story benefits.
+2. **Select and isolate subjects.** The Agent inspects each photo. BiRefNet handles automatic foreground extraction; SAM 2.1 uses Agent-authored boxes and points for specific objects, including mountains, cliffs and roads. ViTMatte refines SAM mask edges.
 3. **Execute the script.** Apply the planned order, timing, zoom and subject anchors. Report pixel enlargement, cropping and runs of small subjects. Photos and cutouts share the same framing so the background reveal stays aligned.
 4. **Assemble and review.** Add music and consistent grading in HyperFrames. Inspect subject detail, transition frames and the final video before delivery.
 
@@ -44,11 +44,14 @@ Story and composition decisions come from the Agent's visual judgment. The tools
 ## Features
 
 - Executable editing scripts for story order, per-shot beats, zoom and placement.
-- Local automatic or targeted cutouts, including multiple selected subjects.
+- Full-coverage or explicitly curated edits with source hashes and omission checks.
+- Local automatic or targeted cutouts, including landscape silhouettes and multiple subjects.
+- Optional white contour overlays sized to each displayed subject, without changing source pixels.
 - Edge refinement that preserves source RGB and full-canvas alignment.
-- Editable HyperFrames projects and MP4 exports.
+- Editable HyperFrames projects, native 4K rendering and bounded mobile MP4 exports.
+- Reference-driven AI collage covers matching the video, with identity and composition review.
 - Aspect ratios: 9:16, 3:4, 4:5, 1:1 and 16:9.
-- User-provided music, original procedural preview music or silence.
+- User-provided music, original procedural preview / tropical guitar and percussion music, or silence.
 - Warm-film, cool-editorial or original-color treatment.
 - Forkable personal presets for pacing, color and style.
 
@@ -69,7 +72,19 @@ python3 scripts/make.py --doctor
 
 Setup downloads pinned, hash-verified model files. The three model weights total approximately 627 MB; runtime dependencies require additional space. Models and isolated environments are stored outside the Skill in `~/.cache/collage-film`, configurable with `COLLAGE_FILM_CACHE`. Forks on the same machine can reuse this cache.
 
-Segmentation runs locally without uploading photos. Models, environments and user media are not bundled into a fork. See the [backend setup and licenses](references/cutout.md) for details.
+Segmentation runs locally without uploading photos. Optional white outlines require OpenCV; tropical music requires SciPy in the active isolated Python environment. AI covers use the host Agent’s built-in image generation tool and send the selected references to that service. Models, environments and user media are not bundled into a fork. See the [backend setup and licenses](references/cutout.md) for details.
+
+## Export and covers
+
+For an original tropical soundtrack, add `--demo-music --music-style tropical-guitar`; use `--white-outline` for proportional borders. Use `--resolution 4k --delivery master --render` for a native master. A 3:4 4K canvas is 2880 × 3840, rebuilt from source assets.
+
+The default rendered delivery retains a master and creates a mobile MP4: up to 1080 on the short edge / 1920 on the long edge, constant 30 fps, H.264 High Level 4.1, 8-bit 4:2:0, bounded 6 Mbps video and AAC audio. This reduces decoding load; playback on every phone is not guaranteed. To convert an existing SDR master:
+
+```bash
+python3 scripts/export_mobile.py --input /path/master.mp4 --output /path/mobile.mp4
+```
+
+For a cover, ask the Agent to make a photographic montage in the video's ratio and palette. It selects up to five references, arranges a clear main subject with supporting landscape, animal, vehicle and detail layers, then reviews the result. AI covers may alter details; they are separate from the pixel-preserving video cutouts. Private media stays outside the public repository.
 
 ## Fork your own version
 
@@ -91,10 +106,13 @@ Deliverables include the editing script, framing review, transparent cutouts, so
 - [Editing script format and execution](references/editing-script.md)
 - [Tool usage and project format](references/operations.md)
 - [Subject selection plans](references/subject-selection.md)
+- [Cover generation](references/cover.md)
+- [Adaptive outlines, 4K and mobile delivery](references/outline-and-export.md)
+- [Original tropical music](references/music.md)
 
 ## Limits
 
-Validated on macOS / Apple Silicon for model inference, targeted subject selection, edge refinement, executable editing plans, independent forks and 9:16 / 3:4 video exports. Windows, Linux, CPU-only operation and 4K refinement have not been fully validated.
+Validated on macOS / Apple Silicon for model inference, targeted subject selection, edge refinement, executable editing plans, independent forks and 9:16 / 3:4 video exports. Native 3:4 4K rendering and 30 fps mobile transcoding have also been verified locally. Windows, Linux, CPU-only operation, full-resolution 4K matting and playback on every phone have not been fully validated.
 
 Complex foliage, transparent materials, occlusion and similar foreground/background colors still require visual review. Enlarging a subject cannot recover motion-blurred detail or hidden anatomy; prefer higher-resolution originals, a different crop, a different photo or a deliberate wide shot when appropriate.
 

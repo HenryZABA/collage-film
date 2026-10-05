@@ -34,7 +34,7 @@ python3 "$SKILL_DIR/scripts/make.py" \
 - 工具接受 BPM 40–240、均匀拍数0.25–32、提前量0–1秒；计算后的每张时长必须满足渲染器0.4–30秒范围。例如200 BPM 的单拍仅0.3秒，会明确拒绝；可显式选择每图两拍。所有数字必须有限，总时长不超过300秒。
 - `--skip-cutout 2,4` 指定这些照片做完整照片切换；仅当用户或审片决定这样处理时使用。
 - `--text 'Small moments'` 可选居中小字；`--end-title 'Keep exploring'` 可选2秒黑底结尾。
-- `--render` 在 check 后生成 `video.mp4`。文件已存在会拒绝；修订 `job.json` 后用 build 重建新输出目录。
+- `--render` 在 check 后生成手机用 `video.mp4`，保留 `video-master.mp4`；`--delivery master` 只输出渲染母版。文件已存在会拒绝；修订 `job.json` 后用 build 重建新输出目录。
 - `--fit auto` 根据前景框调整裁切锚点；裁切无法保留完整主体时采用 contain 留边。`--fit cover` 是经视觉确认后的全幅裁切，`--fit contain` 保留完整照片。原图与 mask 始终相同。
 - 支持9:16、3:4、4:5、1:1、16:9。Douyin 参数归一化到同竖屏布局建议，上传规范不在此工具承诺内。
 
@@ -47,6 +47,10 @@ python3 "$SKILL_DIR/scripts/make.py" \
 制作前按 [剪辑脚本](editing-script.md) 写逐镜头计划，并用 `scripts/edit_plan.py` 执行。`make.py --edit-script FILE` 也可直接使用，脚本拥有顺序、拍数和BPM；不与 `--pace` 或均匀时长参数同时使用。
 
 `job.json` 每张可增加 `framing: {"zoom":1.2,"x":0.02,"y":-0.01}`。zoom是整幅画面的倍率，x/y是相对画幅宽高的位移；照片与抠图共用同样参数。cover模式不允许移位露出空边。最终还是需要看主体完整性和实际清晰度。
+
+## 白边、分辨率、音乐与封面
+
+`--white-outline` / `--no-outline` 按用户选择控制自适应白边；`--resolution 4k` 控制原生画幅；`--delivery mobile|master` 控制交付编码，详见 [白边与导出](outline-and-export.md)。`--demo-music --music-style tropical-guitar` 提供 [原创热带配乐](music.md)。用户要求封面时进入 [参考驱动封面](cover.md)，此路线由 Agent 调用内置 imagegen，不需要再渲染影片。
 
 ## 编辑与重新构建
 

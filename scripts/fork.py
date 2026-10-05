@@ -13,7 +13,7 @@ import tempfile
 
 # Deliberately allow only skill-owned assets. A user project is not a source
 # directory: photos, outputs and credentials must never silently enter forks.
-TOP_LEVEL = {"SKILL.md", "agents", "scripts", "references", "assets", "templates", "LICENSE", "LICENSE.md"}
+TOP_LEVEL = {"SKILL.md", "agents", "scripts", "references", "assets", "templates", "LICENSE", "LICENSE.md", "THIRD_PARTY_NOTICES.md"}
 EXCLUDED = {".git", ".venv", "venv", "node_modules", "__pycache__", ".cache", ".DS_Store", "outputs", "output", "renders", "inputs", "user-assets", "raw", ".env", "credentials", "secrets"}
 
 

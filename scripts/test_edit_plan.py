@@ -18,10 +18,19 @@ class EditPlanTests(unittest.TestCase):
         self.script={'schema_version':1,'story':'Travel fragments','bpm':100,'shots':[dict(self.shot,source_index=i) for i in range(1,4)]}
     def tearDown(self):self.tmp.cleanup()
     def test_order_omission_and_timing_are_executed(self):
+        self.script['coverage']='selected'
         self.script['shots']=[dict(self.shot,source_index=3,beats=2),dict(self.shot,source_index=1)]
         job,r=apply_plan(self.job,self.script,self.base)
         self.assertEqual([s['source_index'] for s in r['shots']],[3,1]);self.assertEqual(r['omitted_source_indices'],[2]);self.assertAlmostEqual(r['duration'],1.8);self.assertEqual(job['scenes'][0]['duration'],1.2)
         self.assertEqual(job['scenes'][0]['leadIn'],0);self.assertEqual(job['scenes'][1]['leadIn'],.2)
+    def test_full_coverage_rejects_omission(self):
+        self.script['shots']=self.script['shots'][:2]
+        with self.assertRaisesRegex(ValueError,'omitted'):apply_plan(self.job,self.script,self.base)
+    def test_4k_measurements_use_actual_canvas(self):
+        self.job['resolution']='4k'
+        _,r=apply_plan(self.job,self.script,self.base)
+        self.assertEqual((r['width'],r['height']),(2160,3840))
+        self.assertEqual(r['shots'][0]['pixel_scale'],2)
     def test_changed_photo_cannot_reuse_old_plan(self):
         self.script['shots'][0]['source_sha256']='0'*64
         with self.assertRaisesRegex(ValueError,'does not match'):apply_plan(self.job,self.script,self.base)

@@ -9,3 +9,5 @@ The root MIT license covers original Collage Film code and documentation only.
 - **Other runtime packages:** Python, PyTorch, transformers, OpenCV, NumPy, Pillow, CMake, Ninja and HyperFrames are installed separately and retain their respective upstream licenses.
 
 Weights, environments, user photos, browser state and credentials are excluded. Demo media in `examples/travel` has its own source/rights record and uses modified Unsplash photos; it is not covered by the root code license.
+
+Optional tropical music synthesis uses SciPy (BSD-3-Clause), installed separately in the active Python environment. No SciPy source or sampled songs are bundled.

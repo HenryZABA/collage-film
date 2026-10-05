@@ -18,6 +18,12 @@ def main():
     p.add_argument('--output',type=Path)
     p.add_argument('--platform',choices=PLATFORMS)
     p.add_argument('--ratio',choices=RATIOS)
+    p.add_argument('--resolution',choices=['1080p','4k'],default='1080p',help='Native composition resolution; 4k sets the long edge to 3840')
+    border=p.add_mutually_exclusive_group()
+    border.add_argument('--white-outline',action='store_true',default=None,help='Adaptive ungraded white contour around reveal subjects')
+    border.add_argument('--no-outline',dest='white_outline',action='store_false')
+    p.add_argument('--music-style',choices=['preview','tropical-guitar'],default='preview',help='Procedural music style when using --demo-music')
+    p.add_argument('--delivery',choices=['mobile','master'],default='mobile',help='mobile adds a bounded 1080p 30fps MP4; master keeps renderer encoding')
     p.add_argument('--title',default='Small moments')
     p.add_argument('--text',default=None,help='Small persistent centered caption; omit for clean photography')
     p.add_argument('--end-title',default='',help='Optional black end card')
@@ -36,7 +42,7 @@ def main():
     p.add_argument('--refine',choices=['auto','none','vitmatte'],default='auto',help='SAM 2 edges: auto uses installed ViTMatte; per-image plan can override this')
     m=p.add_mutually_exclusive_group()
     m.add_argument('--music',type=Path)
-    m.add_argument('--demo-music',action='store_true',help='Create a simple original preview music bed')
+    m.add_argument('--demo-music',action='store_true',help='Create original procedural music in the selected style')
     m.add_argument('--silent',action='store_true')
     p.add_argument('--check',action='store_true')
     p.add_argument('--render',action='store_true',help='Check then render MP4; only pass when user requested a finished video')
@@ -46,11 +52,15 @@ def main():
         for mod in ['PIL','numpy']:
             try:__import__(mod);modules[mod]=True
             except ImportError:modules[mod]=False
+        optional={}
+        for mod in ['cv2','scipy']:
+            try:__import__(mod);optional[mod]=True
+            except ImportError:optional[mod]=False
         backends={}
         if all(modules.values()):
             from cutout import backend_status
             backends={name:backend_status(name) for name in ['birefnet','sam2','vitmatte']}
-        print(json.dumps({'python':sys.version.split()[0],'os':platform.system(),'modules':modules,'executables':{x:bool(shutil.which(x)) for x in ['node','npx','ffmpeg','ffprobe','swift']},'segmentation_backends':backends,'native_segmentation':'macOS 14+ Vision fallback; quality backends require explicit one-time setup','paid_api_required':False},indent=2))
+        print(json.dumps({'python':sys.version.split()[0],'os':platform.system(),'modules':modules,'optional_modules':optional,'executables':{x:bool(shutil.which(x)) for x in ['node','npx','ffmpeg','ffprobe','swift']},'segmentation_backends':backends,'native_segmentation':'macOS 14+ Vision fallback; quality backends require explicit one-time setup','paid_api_required':False},indent=2))
         return 0
     if not a.images or not a.output or not a.platform or not a.ratio:p.error('--images, --output, --platform and --ratio are required')
     if not (a.music or a.demo_music or a.silent):p.error('Choose --music FILE, --demo-music or --silent after collecting music preference')
@@ -93,6 +103,8 @@ def main():
     if a.refine=='vitmatte' and a.backend!='sam2' and any(i not in skip and i not in subject_plans for i in range(1,len(a.images)+1)):
         p.error('Explicit ViTMatte refinement requires SAM 2 for every unplanned photograph; use per-image refine overrides in --subjects for mixed backends')
     preset=json.loads((ROOT/'assets/preset.json').read_text())
+    if a.white_outline is None:a.white_outline=preset.get('whiteOutline',False)
+    if type(a.white_outline) is not bool:p.error('Preset whiteOutline must be boolean')
     script=json.loads(a.edit_script.expanduser().read_text()) if a.edit_script else None
     if script is not None and not isinstance(script,dict):p.error('Editing script must be an object')
     bpm=script.get('bpm') if script is not None else a.bpm if a.bpm is not None else preset.get('bpm',100)
@@ -173,7 +185,7 @@ def main():
     edit_report=None
     if a.edit_script:
         from edit_plan import apply_plan, markdown
-        planned,edit_report=apply_plan({'style':'cutout-reveal','ratio':a.ratio,'scenes':scenes},script,out)
+        planned,edit_report=apply_plan({'style':'cutout-reveal','ratio':a.ratio,'resolution':a.resolution,'scenes':scenes},script,out)
         scenes=planned['scenes'];bpm=edit_report['bpm'];duration=round(edit_report['duration']+(2 if a.end_title else 0),6)
         photo_durations=[s['duration'] for s in scenes];lead_ins=[s['leadIn'] for s in scenes];timing_mode='edit-script'
         warnings.extend(edit_report['warnings'])
@@ -183,22 +195,27 @@ def main():
     bgm=None
     if a.demo_music:
         music=inputs/'original-preview-bed.wav'
-        call([sys.executable,ROOT/'scripts/music.py','--output',music,'--duration',max(1,duration),'--bpm',bpm])
+        call([sys.executable,ROOT/'scripts/music.py','--output',music,'--duration',max(1,duration),'--bpm',bpm,'--style',a.music_style])
         bgm={'path':str(music.relative_to(out)),'volume':preset.get('bgmVolume',.45),'fadeIn':.08,'fadeOut':min(.7,duration*.25)}
     elif a.music:
         suffix=a.music.suffix.lower();music=inputs/('user-music'+suffix);shutil.copy2(a.music.expanduser(),music)
         bgm={'path':str(music.relative_to(out)),'volume':preset.get('bgmVolume',.45),'fadeIn':.12,'fadeOut':min(.7,duration*.25)}
-    job={'schemaVersion':1,'title':a.title,'style':'cutout-reveal','platform':'tiktok' if a.platform=='douyin' else a.platform,'ratio':a.ratio,'fps':preset.get('fps',30),'grade':a.grade or preset.get('grade','warm-film'),'palette':preset.get('palette',{}),'scenes':scenes}
+    job={'schemaVersion':1,'title':a.title,'style':'cutout-reveal','platform':'tiktok' if a.platform=='douyin' else a.platform,'ratio':a.ratio,'resolution':a.resolution,'outline':{'enabled':a.white_outline},'fps':preset.get('fps',30),'grade':a.grade or preset.get('grade','warm-film'),'palette':preset.get('palette',{}),'scenes':scenes}
     caption=a.text if a.text is not None else preset.get('centerText','')
     if caption:job['overlay']={'text':caption,'color':'#ffffff'}
     if a.end_title:job['endCard']={'duration':2,'title':a.end_title,'subtitle':''}
     if bgm:job['bgm']=bgm
     (out/'job.json').write_text(json.dumps(job,ensure_ascii=False,indent=2)+'\n')
     timing={'mode':timing_mode,'pace':pace if timing_mode=='pace' else None,'bpm':bpm,'photo_durations':photo_durations,'requested_lead_in':lead,'lead_in_seconds':lead_ins,'beat_detection':False}
-    (out/'sources.json').write_text(json.dumps({'images':sources,'subjects':list(subject_plans.values()),'music':{'mode':'original-procedural-preview' if a.demo_music else 'user-supplied' if a.music else 'none','bpm_grid':bpm if a.demo_music or a.bpm or a.edit_script else None,'beat_detection':False},'timing':timing,'editing':edit_report,'warnings':warnings},ensure_ascii=False,indent=2)+'\n')
+    (out/'sources.json').write_text(json.dumps({'images':sources,'subjects':list(subject_plans.values()),'music':{'style':a.music_style if a.demo_music else None,'mode':'original-procedural' if a.demo_music else 'user-supplied' if a.music else 'none','bpm_grid':bpm if a.demo_music or a.bpm or a.edit_script else None,'beat_detection':False},'timing':timing,'editing':edit_report,'warnings':warnings},ensure_ascii=False,indent=2)+'\n')
+    import os
+    os.environ['COLLAGE_FILM_PYTHON']=sys.executable
     call(['node',ROOT/'scripts/build.mjs','--config',out/'job.json','--out',out/'project'])
     if a.check or a.render:call(['npm','run','check','--','--snapshots'],cwd=out/'project')
-    if a.render:call(['npm','run','render','--','--quality','looks','--output',out/'video.mp4'],cwd=out/'project')
+    if a.render:
+        master=out/('video-master.mp4' if a.delivery=='mobile' else 'video.mp4')
+        call(['npm','run','render','--','--quality','looks','--output',master],cwd=out/'project')
+        if a.delivery=='mobile':call([sys.executable,ROOT/'scripts/export_mobile.py','--input',master,'--output',out/'video.mp4'])
     print(json.dumps({'ok':True,'job':str(out/'job.json'),'project':str(out/'project'),'video':str(out/'video.mp4') if a.render else None,'timing':timing,'duration':duration,'warnings':warnings,'visual_review_required':True},ensure_ascii=False,indent=2))
     return 0
 if __name__=='__main__':

@@ -1,4 +1,4 @@
 interface:
   display_name: "Collage Film · 抠图转场视频"
-  short_description: "把照片自动抠图、衔接成旅行拼贴视频，适配平台比例、配乐与统一调色"
+  short_description: "把照片自动抠图、衔接成旅行拼贴视频，适配平台比例、配乐调色、手机导出与拼贴封面"
   default_prompt: "使用 $collage-film 把我的照片做成主体先出现、背景随后切入的拼贴视频；先问我发布平台和画幅比例。"

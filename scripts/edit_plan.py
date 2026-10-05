@@ -23,12 +23,19 @@ def text(value, name):
 
 def apply_plan(job, script, base):
     if job.get('style')!='cutout-reveal': raise ValueError('Editing scripts require cutout-reveal')
-    if not isinstance(script,dict) or set(script)-{'schema_version','story','bpm','shots'} or script.get('schema_version')!=1:
+    if not isinstance(script,dict) or set(script)-{'schema_version','story','bpm','shots','coverage'} or script.get('schema_version')!=1:
         raise ValueError('Script requires schema_version=1, story, bpm and shots')
+    coverage=script.get('coverage','all')
+    if coverage not in ('all','selected'): raise ValueError('coverage must be all or selected')
     story=text(script.get('story'),'story'); bpm=num(script.get('bpm'),40,240,'bpm')
     shots=script.get('shots')
     if not isinstance(shots,list) or not 2<=len(shots)<=60: raise ValueError('Script needs 2..60 shots')
-    width,height=RATIOS[job['ratio']]; seen=set(); scenes=[]; measures=[]; warnings=[]; time=0
+    width,height=RATIOS[job['ratio']]
+    resolution=job.get('resolution','1080p')
+    if resolution not in ('1080p','4k'): raise ValueError('resolution must be 1080p or 4k')
+    if resolution=='4k':
+        factor=3840/max(width,height);width,height=round(width*factor/2)*2,round(height*factor/2)*2
+    seen=set(); scenes=[]; measures=[]; warnings=[]; time=0
     for k,shot in enumerate(shots,1):
         if not isinstance(shot,dict) or set(shot)-{'source_index','source_sha256','role','connection','beats','lead_in','zoom','anchor','quality_note'}:
             raise ValueError(f'Unknown shot fields at {k}')
@@ -79,10 +86,12 @@ def apply_plan(job, script, base):
         measures.append(measure); time+=duration
     for k in range(2,len(measures)):
         if all(m['subject_height_fraction'] is not None and m['subject_height_fraction']<.18 for m in measures[k-2:k+1]):
-            warnings.append({'shot':k+1,'code':'three_small_subjects_in_a_row','note':'Review sequence: alternate shot sizes, omit a photo or keep this run only when the story warrants it'})
+            warnings.append({'shot':k+1,'code':'three_small_subjects_in_a_row','note':'Review sequence: alternate shot sizes, revise framing or keep this run only when the story warrants it'})
     if time+job.get('endCard',{}).get('duration',0)>300: raise ValueError('Video exceeds 300 seconds')
+    omitted=sorted(set(range(1,len(job['scenes'])+1))-seen)
+    if coverage=='all' and omitted: raise ValueError(f'Full coverage omitted source indices: {omitted}; selected requires user-authorized curation')
     result=copy.deepcopy(job); result['scenes']=scenes
-    report={'schema_version':1,'story':story,'bpm':bpm,'duration':round(time,6),'shots':measures,'omitted_source_indices':sorted(set(range(1,len(job['scenes'])+1))-seen),'warnings':warnings,'visual_review_required':True,'beat_detection':False,'sharpness_estimated':False}
+    report={'schema_version':1,'coverage':coverage,'input_count':len(job['scenes']),'used_count':len(shots),'width':width,'height':height,'story':story,'bpm':bpm,'duration':round(time,6),'shots':measures,'omitted_source_indices':sorted(set(range(1,len(job['scenes'])+1))-seen),'warnings':warnings,'visual_review_required':True,'beat_detection':False,'sharpness_estimated':False}
     return result,report
 
 def markdown(report):

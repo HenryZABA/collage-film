@@ -56,15 +56,23 @@ function main() {
   const base = path.dirname(configFile);
   const output = path.resolve(args.out);
   const input = JSON.parse(fs.readFileSync(configFile, 'utf8'));
-  keys(input, ['schemaVersion', 'title', 'style', 'platform', 'ratio', 'fps', 'grade', 'palette', 'bgm', 'font', 'overlay', 'endCard', 'scenes'], 'job');
+  keys(input, ['schemaVersion', 'title', 'style', 'platform', 'ratio', 'resolution', 'outline', 'fps', 'grade', 'palette', 'bgm', 'font', 'overlay', 'endCard', 'scenes'], 'job');
   if (input.schemaVersion !== 1) fail('schemaVersion must be 1');
   if (!input.platform || !input.ratio) fail('platform and ratio are required; collect these choices from the user before building');
   const platform = choice(input.platform, null, PLATFORMS, 'platform');
   const ratio = choice(input.ratio, null, Object.keys(RATIOS), 'ratio');
-  const [width, height] = RATIOS[ratio];
+  const resolution = choice(input.resolution, '1080p', ['1080p', '4k'], 'resolution');
+  const factor = resolution === '4k' ? 3840 / Math.max(...RATIOS[ratio]) : 1;
+  const [width, height] = RATIOS[ratio].map(n => Math.round(n * factor / 2) * 2);
+  const outline = input.outline ?? { enabled: false };
+  keys(outline, ['enabled', 'radiusRatio', 'maxRadiusFraction'], 'outline');
+  if (typeof outline.enabled !== 'boolean') fail('outline.enabled must be boolean');
+  outline.radiusRatio = number(outline.radiusRatio, .012, .001, .05, 'outline.radiusRatio');
+  outline.maxRadiusFraction = number(outline.maxRadiusFraction, 1 / 90, .001, .05, 'outline.maxRadiusFraction');
   const fps = choice(input.fps, 30, [24, 25, 30, 50, 60], 'fps');
   const title = text(input.title, 'Collage Film', 160, 'title');
   const style = choice(input.style, 'cutout-reveal', ['cutout-reveal', 'editorial'], 'style');
+  if (outline.enabled && style !== 'cutout-reveal') fail('Adaptive outlines currently require cutout-reveal');
   const grade = choice(input.grade, 'none', Object.keys(GRADES), 'grade');
   const paletteInput = input.palette ?? {};
   keys(paletteInput, ['background', 'ink', 'accent'], 'palette');
@@ -109,7 +117,7 @@ function main() {
   const scenes = input.scenes.map((s, index) => {
     const name = `scenes[${index}]`;
     if (style === 'cutout-reveal') {
-      keys(s, ['duration', 'photo', 'cutout', 'leadIn', 'position', 'fit', 'framing', 'title', 'subtitle'], name);
+      keys(s, ['duration', 'photo', 'cutout', 'leadIn', 'position', 'fit', 'framing', 'outlinePerComponent', 'title', 'subtitle'], name);
       const sceneDuration = number(s.duration, 0.65, 0.4, 30, `${name}.duration`);
       const photo = asset(s.photo, `${name}.photo`, 'background');
       const cutout = s.cutout ? asset(s.cutout, `${name}.cutout`, 'cutout') : null;
@@ -121,7 +129,8 @@ function main() {
       const frame = { zoom: number(framing.zoom, 1, 1, 3, `${name}.framing.zoom`), x: number(framing.x, 0, -.5, .5, `${name}.framing.x`), y: number(framing.y, 0, -.5, .5, `${name}.framing.y`) };
       if ((s.fit ?? 'cover') === 'cover' && (Math.abs(frame.x) > (frame.zoom - 1) / 2 + .000001 || Math.abs(frame.y) > (frame.zoom - 1) / 2 + .000001)) fail(`${name}.framing translation exposes empty edges; increase zoom or reduce shift`);
       const leadIn = index === 0 ? 0 : number(s.leadIn, 0.25, 0, Math.min(1, input.scenes[index - 1].duration ?? 0.65), `${name}.leadIn`);
-      const scene = { id: `scene-${index}`, start: round(duration), duration: sceneDuration, photo, cutout, leadIn, framing: frame, fit: choice(s.fit, 'cover', ['cover', 'contain'], `${name}.fit`), position: { x: number(position.x, 0.5, 0, 1, `${name}.position.x`), y: number(position.y, 0.5, 0, 1, `${name}.position.y`) }, title: text(s.title, '', 100, `${name}.title`), subtitle: text(s.subtitle, '', 180, `${name}.subtitle`) };
+      if (s.outlinePerComponent !== undefined && typeof s.outlinePerComponent !== 'boolean') fail(`${name}.outlinePerComponent must be boolean`);
+      const scene = { outlinePerComponent: s.outlinePerComponent ?? false, id: `scene-${index}`, start: round(duration), duration: sceneDuration, photo, cutout, leadIn, framing: frame, fit: choice(s.fit, 'cover', ['cover', 'contain'], `${name}.fit`), position: { x: number(position.x, 0.5, 0, 1, `${name}.position.x`), y: number(position.y, 0.5, 0, 1, `${name}.position.y`) }, title: text(s.title, '', 100, `${name}.title`), subtitle: text(s.subtitle, '', 180, `${name}.subtitle`) };
       duration = round(duration + sceneDuration);
       return scene;
     }
@@ -184,6 +193,15 @@ function main() {
   const licensePath = path.resolve(HERE, '../templates/vendor/GSAP-LICENSE.txt');
   if (fs.existsSync(licensePath)) fs.copyFileSync(licensePath, path.join(output, 'assets/GSAP-LICENSE.txt'));
   if (bgm) run('ffmpeg', ['-v', 'error', '-y', ...(bgm.loop ? ['-stream_loop', '-1'] : []), '-ss', String(bgm.offset), '-i', bgm.source, '-t', String(duration), '-vn', '-ac', '2', '-ar', '48000', '-c:a', 'pcm_s16le', path.join(output, bgm.path)]);
+  const outlineReports = [];
+  if (outline.enabled) for (const [i, scene] of scenes.entries()) {
+    if (!scene.cutout || !scene.leadIn) continue;
+    scene.outlinePath = `assets/adaptive-outline-${i}.svg`;
+    if (args.overwrite && fs.existsSync(path.join(output, scene.outlinePath))) fs.unlinkSync(path.join(output, scene.outlinePath));
+    const report = JSON.parse(run(process.env.COLLAGE_FILM_PYTHON || 'python3', [path.join(HERE, 'outline.py'), '--input', path.join(output, scene.cutout.path), '--output', path.join(output, scene.outlinePath), '--width', String(width), '--height', String(height), '--fit', scene.fit, '--zoom', String(scene.framing.zoom), '--radius-ratio', String(outline.radiusRatio), '--max-radius', String(Math.min(width, height) * outline.maxRadiusFraction), ...(scene.outlinePerComponent ? ['--per-component'] : [])]));
+    outlineReports.push({ shot: i + 1, start: round(scene.start - scene.leadIn), duration: scene.leadIn, ...report });
+  }
+  fs.writeFileSync(path.join(output, 'outline-report.json'), JSON.stringify(outlineReports, null, 2) + '\n');
   const unit = Math.min(width, height);
   const landscape = width > height;
   const safe = { left: 0.07, right: platform === 'tiktok' || platform === 'instagram' ? 0.13 : 0.07, top: 0.08, bottom: platform === 'tiktok' || platform === 'instagram' ? 0.18 : 0.10 };
@@ -195,6 +213,7 @@ function main() {
       if (s.cutout && s.leadIn > 0) gradeTargets.push(`#cutout-${i}`);
       const geometry = `object-fit:${s.fit};object-position:${objectPosition};transform:translate(${round(s.framing.x * width)}px,${round(s.framing.y * height)}px) scale(${s.framing.zoom});transform-origin:center center`;
       return `<img id="photo-${i}" class="clip aligned-photo" data-start="${s.start}" data-duration="${s.duration}" data-track-index="${i * 2}" data-label="Photo ${i + 1}" data-layout-allow-overflow src="${s.photo.path}" style="${geometry};background:${palette.background}" alt="" />
+      ${s.outlinePath ? `<img id="outline-${i}" class="clip aligned-photo" data-start="${round(s.start - s.leadIn)}" data-duration="${s.leadIn}" data-track-index="${200 + i}" data-label="White outline ${i + 1}" data-layout-allow-overflow src="${s.outlinePath}" style="${geometry};z-index:9" alt="" />` : ''}
       ${s.cutout && s.leadIn > 0 ? `<img id="cutout-${i}" class="clip aligned-photo reveal" data-start="${round(s.start - s.leadIn)}" data-duration="${s.leadIn}" data-track-index="${i * 2 + 1}" data-label="Cutout ${i + 1}" data-layout-allow-overflow src="${s.cutout.path}" style="${geometry}" alt="" />` : ''}
       ${s.title || s.subtitle ? `<p id="shot-caption-${i}" class="clip shot-caption" data-start="${s.start}" data-duration="${s.duration}" data-track-index="${121 + i}">${html(s.title)}${s.title && s.subtitle ? '\n' : ''}${html(s.subtitle)}</p>` : ''}`;
     }
@@ -267,9 +286,9 @@ window.__timelines['collage-film']=tl;
       if (!result.ok) fail(`HyperFrames rejected ${grade} for ${selector}: ${JSON.stringify(result)}`);
     }
   }
-  const portable = { schemaVersion: 1, title, style, platform, ratio, fps, grade, palette, ...(overlay ? { overlay } : {}), ...(endCard ? { endCard } : {}), ...(fontPath ? { font: fontPath } : {}), ...(bgm ? { bgm: { path: bgm.path, volume: bgm.volume, fadeIn: bgm.fadeIn, fadeOut: bgm.fadeOut, offset: 0, loop: false } } : {}), scenes: scenes.map(s => style === 'cutout-reveal' ? { duration: s.duration, photo: s.photo.path, ...(s.cutout ? { cutout: s.cutout.path } : {}), leadIn: s.leadIn, position: s.position, fit: s.fit, framing: s.framing, title: s.title, subtitle: s.subtitle } : { duration: s.duration, title: s.title, subtitle: s.subtitle, ...(s.background ? { background: s.background.path } : {}), layers: s.layers.map(l => ({ path: l.path, x: l.x, y: l.y, width: l.widthFraction, rotation: l.rotation, motion: l.motion })) }) };
+  const portable = { schemaVersion: 1, title, style, platform, ratio, resolution, outline, fps, grade, palette, ...(overlay ? { overlay } : {}), ...(endCard ? { endCard } : {}), ...(fontPath ? { font: fontPath } : {}), ...(bgm ? { bgm: { path: bgm.path, volume: bgm.volume, fadeIn: bgm.fadeIn, fadeOut: bgm.fadeOut, offset: 0, loop: false } } : {}), scenes: scenes.map(s => style === 'cutout-reveal' ? { duration: s.duration, photo: s.photo.path, ...(s.cutout ? { cutout: s.cutout.path } : {}), leadIn: s.leadIn, outlinePerComponent: s.outlinePerComponent, position: s.position, fit: s.fit, framing: s.framing, title: s.title, subtitle: s.subtitle } : { duration: s.duration, title: s.title, subtitle: s.subtitle, ...(s.background ? { background: s.background.path } : {}), layers: s.layers.map(l => ({ path: l.path, x: l.x, y: l.y, width: l.widthFraction, rotation: l.rotation, motion: l.motion })) }) };
   fs.writeFileSync(path.join(output, 'job.resolved.json'), JSON.stringify(portable, null, 2) + '\n');
-  const report = { ok: true, project: output, composition: 'index.html', duration, width, height, ratio, fps, platform, style, grade, sceneCount: scenes.length, imageCount: gradeTargets.length, bgm: Boolean(bgm), grading: GRADES[grade], safeArea: safe, assets: [...assetCache.values()], warnings: fontPath ? [] : ['No bundled font was supplied; system fonts depend on the render machine. Supply job.font for portable typography.'], next: `node ${JSON.stringify(path.join(output, 'check.mjs'))} --project ${JSON.stringify(output)}` };
+  const report = { ok: true, project: output, composition: 'index.html', duration, width, height, ratio, resolution, outlineCount: outlineReports.length, fps, platform, style, grade, sceneCount: scenes.length, imageCount: gradeTargets.length, bgm: Boolean(bgm), grading: GRADES[grade], safeArea: safe, assets: [...assetCache.values()], warnings: fontPath ? [] : ['No bundled font was supplied; system fonts depend on the render machine. Supply job.font for portable typography.'], next: `node ${JSON.stringify(path.join(output, 'check.mjs'))} --project ${JSON.stringify(output)}` };
   fs.writeFileSync(path.join(output, 'build-report.json'), JSON.stringify(report, null, 2) + '\n');
   console.log(JSON.stringify(report, null, 2));
 }

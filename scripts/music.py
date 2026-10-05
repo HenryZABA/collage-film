@@ -8,12 +8,26 @@ def main():
     p.add_argument('--output',required=True)
     p.add_argument('--duration',type=float,default=12)
     p.add_argument('--bpm',type=float,default=110)
+    p.add_argument('--style',choices=['preview','tropical-guitar'],default='preview')
     a=p.parse_args()
     if not 1<=a.duration<=300 or not 40<=a.bpm<=240:p.error('duration 1..300 seconds, BPM 40..240')
     try: import numpy as np
     except ImportError:p.error('Install numpy in your environment: python3 -m pip install numpy')
     dst=Path(a.output).expanduser()
     if dst.exists():p.error('Output exists; choose a new filename')
+    if a.style=='tropical-guitar':
+        try:
+            from tropical_music import compose
+            sr,mix=compose(a.duration,a.bpm)
+        except ImportError:p.error('Tropical guitar additionally requires scipy in the active Python environment')
+        dst.parent.mkdir(parents=True,exist_ok=True)
+        import json
+        sidecar=dst.with_suffix('.music.json')
+        if sidecar.exists():p.error('Music metadata already exists; choose a new filename')
+        with wave.open(str(dst),'wb') as w:
+            w.setnchannels(2);w.setsampwidth(2);w.setframerate(sr);w.writeframes((mix*32767).astype('<i2').tobytes())
+        sidecar.write_text(json.dumps({'origin':'Original procedural synthesis; no song samples or live guitar recording','style':a.style,'instruments':['nylon-string style guitar','bass','conga','shaker','woodblock'],'bpm':a.bpm,'duration':a.duration,'sample_rate':sr,'peak':float(abs(mix).max())},indent=2)+'\n')
+        print(str(dst));return
     sr=44100;n=round(sr*a.duration);mix=np.zeros((n,2),dtype=np.float64);beat=60/a.bpm
     rng=np.random.default_rng(1806)
     def add(signal,start,pan=0):

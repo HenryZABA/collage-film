@@ -11,5 +11,6 @@
     "background": "#ebe0cd",
     "ink": "#171814",
     "accent": "#b96f49"
-  }
+  },
+  "whiteOutline": false
 }
